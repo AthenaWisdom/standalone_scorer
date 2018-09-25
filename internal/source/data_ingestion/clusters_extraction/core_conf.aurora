@@ -1,0 +1,122 @@
+CLUSTER_NAME = '<CLUSTER_NAME>'
+JOB_NAME = '<JOB_NAME>'
+CONTAINER_NAME_PREFIX = '<CADVISOR_PREFIX>.$(cat /etc/instance_id)'
+CUSTOMER_ID = '<CUSTOMER_ID>'
+NUM_INSTANCES = '<NUM_INSTANCES>'
+SPHERE_ID = '<SPHERE_ID>'
+STAGE_NUM = '<STAGE_NUM>'
+TAG_PREFIX = '<TAG_PREFIX>'
+ENVIRONMENT = 'prod'
+
+base_docker_run_command_format = 'docker run --rm ' \
+                                 '-v $(pwd)/meta:/meta ' \
+                                 '-v $(pwd)/work_dir:/work_dir ' \
+                                 '-e CUSTOMER_ID={customer_id} ' \
+                                 '-e SPHERE_ID={sphere_id} ' \
+                                 '-e STAGE_NUM={stage_num} ' \
+                                 '-e INSTANCE_ID={{{{mesos.instance}}}} '
+base_docker_run_command = base_docker_run_command_format.format(customer_id=CUSTOMER_ID,
+                                                                sphere_id=SPHERE_ID,
+                                                                stage_num=STAGE_NUM)
+
+cadvisor_start = Process(
+    name='cadvisor_start',
+    max_failures=5,
+    cmdline='docker run --rm -v /:/rootfs:ro -v /var/run:/var/run:rw -v /sys:/sys:ro '
+            '-v /var/lib/docker/:/var/lib/docker:ro --name=cadvisor jmaitrehenry/cadvisor '
+            '-storage_driver=statsd -storage_driver_host=statsd.hostedgraphite.com:8125 '
+            '-storage_driver_db=d5b1efcf-3248-4fe9-bc61-b73a3fcb8ae8.{}'.format(CONTAINER_NAME_PREFIX))
+
+cadvisor_stop = Process(
+    name='cadvisor_stop',
+    max_failures=5,
+    cmdline='PID=$(docker inspect --format \{\{.State.Pid\}\} cadvisor) || '
+            'true && if [ $PID ]; then sudo kill -INT $PID; fi')
+
+prepare_environment = Process(
+    max_failures=1,
+    name='prepare_environment',
+    cmdline='cp -p /creds/.dockercfg ./ && chmod 600 .dockercfg && mkdir input_csv meta out1 out2 out3 work_dir')
+
+pull_images = Process(
+    max_failures=5,
+    name='pull_images',
+    cmdline='docker pull endor/core:{{tag_prefix}}preprocessor && '
+            'docker pull endor/core:{{tag_prefix}}phase-1 && '
+            'docker pull endor/core:{{tag_prefix}}phase-2 && '
+            'docker pull endor/core:{{tag_prefix}}munifier && '
+            'docker pull endor/core:{{tag_prefix}}postprocessor')
+
+preprocess = Process(
+    max_failures=5,
+    name='preprocess',
+    cmdline=base_docker_run_command + '-v $(pwd)/input_csv:/in  --name={{mesos.instance}}-preprocess '
+                                      'endor/core:{{tag_prefix}}preprocessor && sleep 10')
+
+phase_1 = Process(
+    max_failures=5,
+    name='phase_1',
+    cmdline=base_docker_run_command + '-v $(pwd)/input_csv:/in -v $(pwd)/out1:/out --name={{mesos.instance}}-phase-1 '
+                                      'endor/core:{{tag_prefix}}phase-1 && sleep 10')
+
+phase_2 = Process(
+    max_failures=5,
+    name='phase_2',
+    cmdline=base_docker_run_command + '-v $(pwd)/out1:/in -v $(pwd)/out2:/out --name={{mesos.instance}}-phase-2 '
+                                      'endor/core:{{tag_prefix}}phase-2 && sleep 10')
+
+munifier_upload_template = Process(
+    name='munifier_upload',
+    cmdline='{0} -v $(pwd)/out2:/in -v $(pwd)/out3:/out --name={{{{mesos.instance}}}}-{{{{munifier_name}}}} '
+            'endor/core:{{{{tag_prefix}}}}munifier && {0} -v $(pwd)/out3:/in -e FINAL={{{{final_run}}}} '
+            '--name={{{{postprocessor_name}}}} '
+            'endor/core:{{{{tag_prefix}}}}postprocessor && sleep 10'.format(base_docker_run_command))
+
+munifier_upload = munifier_upload_template(max_failures=5).bind(munifier_name='munifier',
+                                                                postprocessor_name='postprocessor',
+                                                                final_run='true')
+
+munifier_upload_recurring = munifier_upload_template(
+    name='munifier_upload_recurring',
+    ephemeral=True,
+    daemon=True,
+    max_failures=100,
+    min_duration=600).bind(munifier_name='munifier_recurring',
+                           postprocessor_name='postprocessor_recurring',
+                           final_run='false')
+
+clean_environment = Process(
+    name='clean_environment',
+    final=True,
+    cmdline='rm -rf input_csv meta out1 out2 out3 work_dir && (docker rm -f $(docker ps -aq) || true)')
+
+task = Task(
+    name='core_task',
+    processes=[
+        prepare_environment,
+        pull_images,
+        preprocess,
+        phase_1,
+        phase_2,
+        munifier_upload,
+        clean_environment,
+        munifier_upload_recurring
+    ],
+    max_concurrency=3,
+    constraints=order(prepare_environment,
+                      pull_images,
+                      preprocess,
+                      phase_1,
+                      phase_2,
+                      munifier_upload),
+    resources=Resources(cpu=7, ram=45 * GB, disk=950 * GB))
+
+core_job = Job(
+    task=task,
+    name=JOB_NAME,
+    cluster=CLUSTER_NAME,
+    environment=ENVIRONMENT,
+    role='ubuntu',
+    instances=NUM_INSTANCES).bind(tag_prefix=TAG_PREFIX)
+
+jobs = [core_job]

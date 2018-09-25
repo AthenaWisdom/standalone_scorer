@@ -1,0 +1,122 @@
+{
+  "ensembles": [
+    {
+      "ensemble_scheme": "logistic_ensemble",
+      "parameters": {
+        "regularization_factor": 0.000001
+      },
+      "tags": ["internal", "random"]
+    },
+    {
+      "ensemble_scheme": "logistic_ensemble",
+      "parameters": {
+        "regularization_factor": 0.5
+      },
+      "tags": ["internal", "random"]
+    }
+  ],
+  "run_time": "heavy",
+  "scorers": [
+    {
+      "name": "HomeScorer",
+      "normalize": false,
+      "run_time_weight": "light",
+      "conf": {},
+      "unscored_handler": "LeaveUnscored",
+      "default_invert": false,
+      "tags": ["internal"]
+    },
+    {
+      "name": "ClustersMLProbScorer",
+      "normalize": false,
+      "run_time_weight": "medium",
+      "conf": {
+        "ML_TH1": 5.6,
+        "ML_TH2": 0.6,
+        "ML_MISC": -1,
+        "categorical_features": [
+          "type",
+          "blk_type",
+          "field",
+          "fieldby",
+          "src_0",
+          "src_1"
+        ],
+        "numerical_features": [
+          "thrs_0",
+          "thrs_1",
+          "deg",
+          "percInternal"
+        ],
+        "n_estimators": 50,
+        "base_estimator": "decision_tree"
+      },
+      "unscored_handler": "LeaveUnscored",
+      "default_invert": false,
+      "tags": ["internal"]
+    },
+    {
+      "name": "RandomScorer",
+      "normalize": false,
+      "run_time_weight": "light",
+      "conf": {},
+      "unscored_handler": "LeaveUnscored",
+      "default_invert": false,
+      "tags": ["random"]
+    }
+  ],
+  "bag_weighters": [
+    {
+      "method": "BagKLByKDEWeighter",
+      "normalize": true,
+      "params": {
+        "width": 0.01,
+        "eval_min": 0,
+        "eval_max": 1,
+        "eval_num_points": 100
+      }
+    },
+    {
+      "method": "BagKLByHistWeighter",
+      "normalize": true,
+      "params": {
+        "bins_num": 100
+      }
+    }
+  ],
+  "data_naming_conventions": {
+    "mat_file_init_name": "blk_data",
+    "universe_name": "universe.txt",
+    "whites_name": "whites_example.txt",
+    "ground_name": "ground_truth.txt"
+  },
+  "mat_file_fields": {
+    "src": 2,
+    "type": 1,
+    "blk_type": 1,
+    "field": 1,
+    "fieldby": 1,
+    "N": 1,
+    "WN": 1,
+    "deg": 1,
+    "thrs": 2,
+    "SUB_CLUSTERS_FILE": 1,
+    "percInternal": 1
+  },
+  "curr_bag": {
+    "name": "curr_all",
+    "slicing_conditions": [
+    ]
+  },
+  "past_bag": {
+    "name": "past_all",
+    "slicing_conditions": [
+    ]
+  },
+  "// de_enumerate:": "Should ID's be de-enumerated at end of phase 5 for each query suspects file, Optional.",
+  "// de_enumerate_EXAMPLE_VALUE:": {
+    "// enum_table": "Full, absolute remote path to mapping between enumerated and de-enumerated ID's.",
+    "enum_table": "some/path/to/cleaned/unified-enum_data.csv.gz"
+  }
+}
+

@@ -1,0 +1,9 @@
+{
+  "order": ["customer_name", "quest_id", "query_id", "sphere_id", "sub_kernel_id"],
+  "customer_name": "fake_test_customer_query_phase",
+  "quest_id": "fake_quest_id_test",
+  "query_id": "fake_query_id_test",
+  "sphere_id": "fake_sphere_for_test_query",
+  "sub_kernel_id": "some_subkernel_fake_id",
+  "tier": "sub_kernel"
+}

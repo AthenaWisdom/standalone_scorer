@@ -1,0 +1,14 @@
+boto3==1.7.60
+botocore==1.10.60
+boto==2.49.0
+logstash-formatter==0.5.14
+logstash-handler==0.1.0
+elasticsearch==2.1.0
+enum34==1.1.2
+pytz==2015.7
+redis==2.10.5
+jsonschema==2.5.1
+statsd==3.2.1
+mock==1.3.0
+dill==0.2.5
+google-api-python-client==1.5.0

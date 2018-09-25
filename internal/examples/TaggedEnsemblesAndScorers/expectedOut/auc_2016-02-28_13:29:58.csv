@@ -1,0 +1,2 @@
+,HomeScorer_LeaveUnscored,ClustersMLProbScorer_LeaveUnscored,logistic_ensemble_regularization_factor=1e-06,logistic_ensemble_regularization_factor=0.5
+auc,0.679567307692,0.692487980769,0.717584134615,0.7184375

@@ -1,0 +1,6 @@
+from source.data_ingestion.clusters_extraction.clusters_extractor import ClustersExtractor
+from source.storage.stores.engine_communication_store.uri_based import URIBasedEngineCommunicationStore
+
+
+def build_prod_clusters_extractor(artifact_store, io_handler):
+    return ClustersExtractor(artifact_store, URIBasedEngineCommunicationStore(io_handler))
