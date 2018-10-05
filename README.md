@@ -5,7 +5,7 @@ prerequisite:
 Docker CE : https://docs.docker.com/install/
 
 in order to use:
- - bash <(curl -s https://raw.githubusercontent.com/AthenaWisdom/standalone_scorer/master/bin/run.sh
+ - bash <(curl -s https://raw.githubusercontent.com/AthenaWisdom/standalone_scorer/master/bin/run.sh)
 
 
 Important files:
