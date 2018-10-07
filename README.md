@@ -10,8 +10,10 @@ in order to use:
 
 Important files:
 
-./in/in/universe.txt -> The entire population one wants to label. The file is a CSV format and should maintain this naming convention.
-./in/in/whites_example.txt -> A “look alikes” subpopulation: given as a sample to the engine, in order to find more like these (i.e, the grounds). The file is a CSV format and should maintain this naming convention.
+./in/in/kernel.csv -> The entire population one wants to label. The file is a CSV format and should maintain this naming convention.
+
+
+The file is a CSV format and should maintain this naming convention.
 
 Important notes:
 sphere (all data) has to include universe entities, which has to include whites entities.
