@@ -1,5 +1,5 @@
 #!/bin/bash -e -x -o pipefail
-
+docker --version
 echo working on $PWD
 output_dir="./output"
 input_dir="./input"
