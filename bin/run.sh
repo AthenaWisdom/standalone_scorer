@@ -13,7 +13,7 @@ if [ ! -d $input_dir ]; then
 	unzip -o input.zip
 else
 	# validate the basic csv structure.
-	csv_path=${input}/input/kernel.csv
+	csv_path=${input_dir}/input/kernel.csv
 	echo "csv path is ${csv_path}"
 	sed 1,1d $csv_path | awk 'BEGIN{FS=OFS=","} NF!=9{print "csv should contain 9 fields currently have:"NF; exit}'
 	sed 1,1d $csv_path | awk -F, '!($1~/^[0-9]+$/) {print "1st field invalid" $1; exit}'
