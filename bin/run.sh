@@ -8,7 +8,6 @@ if [ ! -d $output_dir ]; then
 	mkdir $output_dir
 fi
 # if no input folder - create it.
-curl -m 2 http://devYuval.endorians.com:8001 || echo failed send stats
 if [ ! -d $input_dir ]; then
 	curl -o input.zip https://raw.githubusercontent.com/AthenaWisdom/standalone_scorer/master/bin/input.zip
 	unzip -o input.zip
