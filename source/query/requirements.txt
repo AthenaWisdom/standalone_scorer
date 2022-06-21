@@ -10,7 +10,7 @@ logstash-handler==0.1.0
 messytables
 mock==1.3.0
 nose-parameterized==0.5.0
-numpy==1.11.2
+numpy==1.22.0
 pandas==0.18.1
 PyFunctional==0.7.1
 redis==2.10.5
