@@ -6,7 +6,7 @@ logstash-handler==0.1.0
 elasticsearch==2.1.0
 enum34==1.1.2
 pytz==2015.7
-redis==2.10.5
+redis==4.5.3
 jsonschema==2.5.1
 statsd==3.2.1
 mock==1.3.0
