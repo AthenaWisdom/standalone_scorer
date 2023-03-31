@@ -13,7 +13,7 @@ nose-parameterized==0.5.0
 numpy==1.11.2
 pandas==0.18.1
 PyFunctional==0.7.1
-redis==2.10.5
+redis==4.4.4
 scikit-learn==0.16.1
 scipy==0.13.3
 statsd==3.2.1
